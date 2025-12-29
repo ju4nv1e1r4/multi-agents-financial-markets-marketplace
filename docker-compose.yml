@@ -22,6 +22,8 @@ services:
       - redis
     environment:
       - REDIS_URL=redis://redis:6379
+      # - GOOGLE_API_KEY=coloque-sua-chave-api-aqui # pra usar o gemini, você coloca sua chave API aqui, hardcoded
+      # ou, simplesmente cria essa variável de ambiente em um .env
     networks:
       - market_net
 
