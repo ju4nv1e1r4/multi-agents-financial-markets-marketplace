@@ -1,4 +1,5 @@
-from src.data.models import AgentState, Order, OrderSide, AssetType, Trade
+from decimal import Decimal
+from src.data.models import AgentState, Order, OrderSide, AssetType, Trade, OrderType
 
 class Agent:
     def __init__(self, agent_id: str, role: str, personality: str, initial_gold: float = 1000.0):
@@ -6,11 +7,11 @@ class Agent:
             agent_id=agent_id,
             role=role,
             inventory={asset: 0 for asset in AssetType},
-            gold_balance=initial_gold,
+            gold_balance=Decimal(str(initial_gold)),
             personality=personality
         )
 
-    def create_order(self, asset: AssetType, side: OrderSide, price: float, quantity: int) -> Order:
+    def create_order(self, asset: AssetType, side: OrderSide, price: float, quantity: int, order_type: OrderType = OrderType.LIMIT) -> Order:
         """
         Cria uma intenção de ordem.
         """
@@ -19,7 +20,8 @@ class Agent:
             agent_id=self.state.agent_id,
             asset=asset,
             side=side,
-            price=price,
+            type=order_type,
+            price=Decimal(str(price)),
             quantity=quantity
         )
 
