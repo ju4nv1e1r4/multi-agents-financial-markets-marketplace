@@ -13,18 +13,17 @@ services:
 
   app:
     build: .
-    container_name: market_sim_app
+    container_name: market_app
     volumes:
       - .:/app
     env_file:
       - .env
     depends_on:
       - redis
-    command: tail -f /dev/null
+    environment:
+      - REDIS_URL=redis://redis:6379
     networks:
       - market_net
-    profiles:
-      - waitDev
 
 volumes:
   redis_data:

@@ -26,7 +26,7 @@ class MarketService:
         logger.info(f"Market Engine iniciando... Conectado em {REDIS_URL}")
 
         await self.pubsub.subscribe("market:orders")
-        logger.info("📡 Escutando canal 'market:orders'...")
+        logger.info("Escutando canal 'market:orders'...")
 
         try:
             async for message in self.pubsub.listen():
