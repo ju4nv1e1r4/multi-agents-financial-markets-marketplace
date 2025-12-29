@@ -63,6 +63,7 @@ class MarketService:
             trade_json = trade.model_dump_json()
 
             await self.redis.publish("market:ticker", trade_json)
+            await self.redis.set("market:last_trade", trade_json)
             
             logger.info(f"TRADE EXECUTADO: {trade.quantity} {trade.asset.value} @ ${trade.price} ({trade.buyer_agent_id} -> {trade.seller_agent_id})")
 
