@@ -11,3 +11,6 @@ wheels/
 
 # EXAMPLES
 src/utils/example.py
+
+# env vars
+.env
