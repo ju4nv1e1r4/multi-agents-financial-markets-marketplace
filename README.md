@@ -1,41 +1,46 @@
-# 🤖 Multi-Agent Marketplace Simulation
-
-> **Status:** 🚧 Phase 2: Intelligence Layer (Active)
+# Multi-Agent Marketplace Simulation
 
 A high-fidelity simulation of an autonomous marketplace where AI Agents act as economic actors (Producers, Consumers, Speculators), creating emergent market dynamics through a centralized Limit Order Book.
 
-Designed as a technical challenge for **CloudWalk**, focusing on system resilience, financial accuracy, and agentic behaviors.
+![alt text](docs/img/mainScreenShot.png)
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The system follows a strictly decoupled **Event-Driven Architecture** using Redis Pub/Sub to separate the Matching Engine from the Agent Minds.
 
-### 1. The Core Engine (Market Microstructure)
+### 1. The Core Engine
 Unlike simple swap mechanisms, this simulation implements a robust **Continuous Double Auction** mechanism via a Limit Order Book (LOB).
 - **Algorithm:** Price-Time Priority (FIFO).
 - **Data Structures:** Min/Max Heaps for O(1) access to best bid/ask.
 - **Settlement:** Instantaneous atomic execution handling partial fills and resting orders.
-- **Protocol:** Asynchronous processing via `market:orders` and `market:ticker` channels.
+- **Protocol:** Asynchronous processing via `market:orders`, `market:news_history`, `market:price` and `market:news` channels.
 
-### 2. The Agents (The Brains)
+### 2. The Agents
 Agents operate on a **Perceive-Reason-Act** loop powered by LLMs (Gemini Flash).
 - **Perception:** Agents analyze the Order Book depth and their own inventory/balance.
 - **Reasoning:** Each agent has a distinct Persona (e.g., *FOMO Trader*, *Conservative Market Maker*, *Distressed Producer*) that dictates their strategy.
 - **Action:** Agents output strict JSON commands to place Limit or Market orders.
 
-## 🛠️ Tech Stack
+### 3. The UI (Command & Control)
+A Streamlit-based UI that acts as the system monitor and controller.
+- **Monitor:** Real-time visualization of LOB prices, agent thought logs, and news feed.
+- **Control:** Start/Pause the simulation via Redis keys.
+- **Intervention:** Manual order entry and "Chaos Mode" (News Injection).
 
-- **Language:** Python 3.11 (Heavy use of `Pydantic` for strict typing).
-- **Orchestration:** LangChain / Custom Loop.
-- **Database/Messaging:** Redis Stack (RedisJSON + Pub/Sub).
-- **LLM:** Google Gemini Flash (Optimized for latency and throughput).
+## Tech Stack
+
+- **Language:** Python (Heavy use of `Pydantic` for strict typing).
+- **Orchestration:** LangChain / LangGraph (State Machines).
+- **Database/Messaging:** Redis Stack (RedisJSON + Pub/Sub + RediSearch/Vector).
+- **LLM:** Google Gemini Flash.
+- **UI:** Streamlit.
 - **Infrastructure:** Docker & Docker Compose (End-to-end reproducibility).
 
-## 🚀 How to Run
+## How to Run
 
 ### Prerequisites
 - Docker & Docker Compose installed.
-- A valid `GOOGLE_API_KEY` (or `OPENAI_API_KEY`) in a `.env` file.
+- A valid `GOOGLE_API_KEY` in a `.env` file.
 
 ### Steps
 1. Clone the repository.
@@ -43,25 +48,26 @@ Agents operate on a **Perceive-Reason-Act** loop powered by LLMs (Gemini Flash).
    ```bash
    cp .env.example .env
    # Add your API Key
+   ```
 3. Start the simulation:
-```bash
-# Starts Redis and the Market Engine
-docker-compose up --build
-```
-4. In a separate terminal, launch the agents:
-```bash
-# This script instantiates the agents and connects them to the Redis bus
-python src/utils/simulation.py
-```
+   ```bash
+   docker-compose up --build
+   ```
+4. Access the Dashboard:
+   Open [http://localhost:8501](http://localhost:8501) in your browser.
+   
+   *Note: The simulation starts in PAUSED state. Click "INICIAR Simulação" in the sidebar.*
 
-## Current Capabilities (v0.2)
+## Current Capabilities (v0.3)
 
-[x] Real-time Order Matching: Bids and Asks are matched based on price/time priority.
+[x] **Real-time Order Matching:** Bids and Asks are matched based on price/time priority.
 
-[x] Emergent Behavior: Agents react to price spikes (FOMO) and liquidity crunches.
+[x] **Cognitive Agents (RAG):** Agents use Vector Search to recall past strategies and outcomes.
 
-[x] Resilience: The Engine handles invalid payloads and connectivity drops without crashing.
+[x] **Market Dynamics:** Agents react to "Breaking News" (e.g., droughts, regulations) injected into the system.
 
-[x] Logging: Full transaction logs available in stdout (structured logging).
+[x] **Command & Control UI:** Full observability and manual intervention capabilities.
+
+[x] **Resilience:** The Engine handles invalid payloads and connectivity drops without crashing.
 
 Built by me
