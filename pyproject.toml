@@ -8,6 +8,7 @@ dependencies = [
     "langchain>=1.2.0",
     "langchain-google-genai>=4.1.2",
     "langgraph>=1.0.5",
+    "numpy>=2.2.6",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.1",
     "redis>=7.1.0",

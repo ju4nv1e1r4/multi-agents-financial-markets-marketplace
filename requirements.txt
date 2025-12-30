@@ -23,6 +23,7 @@ langgraph-checkpoint==3.0.1
 langgraph-prebuilt==1.0.5
 langgraph-sdk==0.3.1
 langsmith==0.5.1
+numpy==2.2.6
 orjson==3.11.5
 ormsgpack==1.12.1
 packaging==25.0
