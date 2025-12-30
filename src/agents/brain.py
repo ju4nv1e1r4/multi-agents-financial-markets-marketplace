@@ -12,6 +12,7 @@ from langgraph.graph import StateGraph, END
 from src.data.models import OrderSide, AssetType
 from src.agents.models import AgentBrainState
 from src.agents.models import AgentDecision
+from src.infra.memory_store import MemoryStore
 
 logger = logging.getLogger(__name__)
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
@@ -19,10 +20,15 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 class AgentBrain:
     def __init__(self, model_name="gemini-2.5-flash"):
         self.redis = redis.Redis.from_url(REDIS_URL, decode_responses=True)
+        api_key = os.getenv("GOOGLE_API_KEY")
         self.llm = ChatGoogleGenerativeAI(
             model=model_name,
-            api_key=os.getenv("GOOGLE_API_KEY"),
+            api_key=api_key,
             temperature=0.7
+        )
+        self.memory_store = MemoryStore(
+            redis_url=REDIS_URL,
+            api_key=api_key
         )
         self.structured_llm = self.llm.with_structured_output(AgentDecision) 
         self.graph = self._build_graph()
@@ -41,7 +47,7 @@ class AgentBrain:
 
         return workflow.compile()
 
-    def perceive_market(self, state: AgentBrainState):
+    async def perceive_market(self, state: AgentBrainState):
         logger.info(f"{state['agent_id']} observando mercado...")
 
         last_trade_json = self.redis.get("market:last_trade")
@@ -55,10 +61,14 @@ class AgentBrain:
             except Exception as e:
                 logger.warning(f"Erro ao ler market data: {e}")
 
+        query_context = f"Market Trend: {market_obs.get('trend', 'flat')}. Last Price: {market_obs.get('last_price')}"
+        memories = await self.memory_store.recall_memories(state['agent_id'], query_context)
+        
         state["market_data"] = market_obs
+        state["memories"] = memories
         return state
 
-    def generate_strategy(self, state: AgentBrainState):
+    async def generate_strategy(self, state: AgentBrainState):
         """LLM central"""
         logger.info(f"{state['agent_id']} pensando...")
 
@@ -69,13 +79,16 @@ class AgentBrain:
             - Ouro: {gold}
             - Inventário: {inventory}
             - Mercado: {market_data}
+            
+            MEMÓRIAS (Lições do Passado):
+            {memories}
 
             Qual sua próxima jogada?
             """)
         ])
 
         chain = prompt | self.structured_llm
-        decision: AgentDecision = chain.invoke(state)
+        decision: AgentDecision = await chain.ainvoke(state)
 
         return {
             "thought_process": decision.thought_process,
@@ -83,7 +96,7 @@ class AgentBrain:
             "order_details": decision.order_details.model_dump() if decision.order_details else None
         }
 
-    def execute_order(self, state: AgentBrainState):
+    async def execute_order(self, state: AgentBrainState):
         """Execução e Validação"""
         action = state.get("chosen_action")
         
@@ -113,10 +126,14 @@ class AgentBrain:
             }
             self.redis.publish("market:orders", json.dumps(order_payload))
             logger.info(f"{state['agent_id']} ENVIOU ORDEM: {details['side']} {details['quantity']} {details['asset']} @ {details['price']}")
+
+            memory_content = f"Cenário: {state['market_data']}. Ação: {action} {details['side']} {details['asset']}. Motivo: {state['thought_process']}"
+            await self.memory_store.save_memory(state['agent_id'], memory_content)
+            
         else:
             logger.info(f"{state['agent_id']} decidiu esperar.")
             
         return state
 
-    def run_cycle(self, initial_state: AgentBrainState):
-        return self.graph.invoke(initial_state)
+    async def run_cycle(self, initial_state: AgentBrainState):
+        return await self.graph.ainvoke(initial_state)

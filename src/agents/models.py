@@ -20,6 +20,7 @@ class AgentBrainState(TypedDict):
     
     # perception
     market_data: MarketObservation
+    memories: Optional[str]
     
     # reasoness
     thought_process: Optional[str]
