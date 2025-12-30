@@ -49,7 +49,7 @@ class MarketService:
 
             if trades:
                 await self.publish_trades(trades)
-            
+
             # NOTE: For my-self, to remember if necessary
             # Snapshot do Book persistance on Redis (failures recovery):
             # await self.snapshot_book(order.asset)
@@ -64,7 +64,9 @@ class MarketService:
 
             await self.redis.publish("market:ticker", trade_json)
             await self.redis.set("market:last_trade", trade_json)
-            
+
+            await self.redis.set(f"market:price:{trade.asset.value}", str(trade.price))
+
             logger.info(f"TRADE EXECUTADO: {trade.quantity} {trade.asset.value} @ ${trade.price} ({trade.buyer_agent_id} -> {trade.seller_agent_id})")
 
 if __name__ == "__main__":

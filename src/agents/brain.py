@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime
 from typing import Literal
 from decimal import Decimal
 from redis.asyncio import Redis
@@ -140,6 +141,15 @@ class AgentBrain:
             }
             await self.redis.publish("market:orders", json.dumps(order_payload))
             logger.info(f"{state['agent_id']} ENVIOU ORDEM: {details['side']} {details['quantity']} {details['asset']} @ {details['price']}")
+
+            log_entry = {
+                "timestamp": datetime.now().strftime("%H:%M:%S"),
+                "agent_id": state["agent_id"],
+                "action": f"{action} {details['side']} {details['asset']}",
+                "reasoning": state.get("thought_process", "")
+            }
+            await self.redis.lpush("agent:logs", json.dumps(log_entry))
+            await self.redis.ltrim("agent:logs", 0, 99)
 
             memory_content = f"Cenário: {state['market_data']}. Ação: {action} {details['side']} {details['asset']}. Motivo: {state['thought_process']}"
             await self.memory_store.save_memory(state['agent_id'], memory_content)
