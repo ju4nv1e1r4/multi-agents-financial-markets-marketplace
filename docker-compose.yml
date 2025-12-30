@@ -11,7 +11,7 @@ services:
     networks:
       - market_net
 
-  app:
+  market_engine:
     build: .
     container_name: market_app
     volumes:
@@ -24,6 +24,40 @@ services:
       - REDIS_URL=redis://redis:6379
       # - GOOGLE_API_KEY=coloque-sua-chave-api-aqui # pra usar o gemini, você coloca sua chave API aqui, hardcoded
       # ou, simplesmente cria essa variável de ambiente em um .env
+    command: ["python", "-m", "src.main"]
+    networks:
+      - market_net
+
+  user_interface:
+    build: .
+    container_name: market_ui_monitor
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379
+    command: ["streamlit", "run", "src/ui/app.py", "--server.address=0.0.0.0"]
+    networks:
+      - market_net
+
+  agents:
+    build: .
+    container_name: market_agents
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - market_engine
+    environment:
+      - REDIS_URL=redis://redis:6379
+    command: ["python", "-m", "src.utils.simulation"]
     networks:
       - market_net
 
