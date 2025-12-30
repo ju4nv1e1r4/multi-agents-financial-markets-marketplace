@@ -24,6 +24,7 @@ class AgentBrainState(TypedDict):
     
     # reasoness
     thought_process: Optional[str]
+    breaking_news: Optional[str]
     
     # decision
     chosen_action: Optional[str]

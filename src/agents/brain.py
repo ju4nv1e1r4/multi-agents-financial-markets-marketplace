@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Literal
 from decimal import Decimal
-import redis
+from redis.asyncio import Redis
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -19,7 +19,7 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 
 class AgentBrain:
     def __init__(self, model_name="gemini-2.5-flash"):
-        self.redis = redis.Redis.from_url(REDIS_URL, decode_responses=True)
+        self.redis = Redis.from_url(REDIS_URL, decode_responses=True)
         api_key = os.getenv("GOOGLE_API_KEY")
         self.llm = ChatGoogleGenerativeAI(
             model=model_name,
@@ -50,7 +50,7 @@ class AgentBrain:
     async def perceive_market(self, state: AgentBrainState):
         logger.info(f"{state['agent_id']} observando mercado...")
 
-        last_trade_json = self.redis.get("market:last_trade")
+        last_trade_json = await self.redis.get("market:last_trade")
         
         market_obs = state["market_data"]
         
@@ -64,8 +64,18 @@ class AgentBrain:
         query_context = f"Market Trend: {market_obs.get('trend', 'flat')}. Last Price: {market_obs.get('last_price')}"
         memories = await self.memory_store.recall_memories(state['agent_id'], query_context)
         
+        last_news_list = await self.redis.lrange("market:news_history", 0, 0)
+        breaking_news = "Sem notícias recentes."
+        if last_news_list:
+            try:
+                breaking_news = json.loads(last_news_list[0]).get("content", "")
+            except:
+                breaking_news = str(last_news_list[0])
+
+        state['breaking_news'] = breaking_news
         state["market_data"] = market_obs
         state["memories"] = memories
+
         return state
 
     async def generate_strategy(self, state: AgentBrainState):
@@ -79,6 +89,10 @@ class AgentBrain:
             - Ouro: {gold}
             - Inventário: {inventory}
             - Mercado: {market_data}
+            ÚLTIMA NOTÍCIA: {breaking_news}
+
+            Como isso afeta sua estratégia? Se a notícia for ruim para um ativo que você tem, considere vender (Panic Sell). 
+             Se for boa, considere comprar (FOMO).
             
             MEMÓRIAS (Lições do Passado):
             {memories}
@@ -124,7 +138,7 @@ class AgentBrain:
                 "price": details["price"],
                 "quantity": details["quantity"],
             }
-            self.redis.publish("market:orders", json.dumps(order_payload))
+            await self.redis.publish("market:orders", json.dumps(order_payload))
             logger.info(f"{state['agent_id']} ENVIOU ORDEM: {details['side']} {details['quantity']} {details['asset']} @ {details['price']}")
 
             memory_content = f"Cenário: {state['market_data']}. Ação: {action} {details['side']} {details['asset']}. Motivo: {state['thought_process']}"

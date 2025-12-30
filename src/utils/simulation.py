@@ -34,6 +34,7 @@ async def run_simulation():
             "inventory": {AssetType.WOOD: 100, AssetType.FOOD: 100},
             "market_data": {"best_bid": 0, "best_ask": 0, "last_price": 0, "trend": "flat"},
             "memories": "",
+            "breaking_news": None,
             "thought_process": None,
             "chosen_action": None,
             "order_details": None
@@ -46,6 +47,7 @@ async def run_simulation():
             "inventory": {AssetType.WOOD: 50, AssetType.FOOD: 50},
             "market_data": {"best_bid": 0, "best_ask": 0, "last_price": 0, "trend": "flat"},
             "memories": "",
+            "breaking_news": None,
             "thought_process": None,
             "chosen_action": None,
             "order_details": None
@@ -58,6 +60,7 @@ async def run_simulation():
             "inventory": {AssetType.WOOD: 0, AssetType.FOOD: 0},
             "market_data": {"best_bid": 0, "best_ask": 0, "last_price": 0, "trend": "flat"},
             "memories": "",
+            "breaking_news": None,
             "thought_process": None,
             "chosen_action": None,
             "order_details": None
@@ -70,6 +73,7 @@ async def run_simulation():
             "inventory": {AssetType.WOOD: 0, AssetType.FOOD: 0},
             "market_data": {"best_bid": 0, "best_ask": 0, "last_price": 0, "trend": "flat"},
             "memories": "",
+            "breaking_news": None,
             "thought_process": None,
             "chosen_action": None,
             "order_details": None
@@ -82,6 +86,7 @@ async def run_simulation():
             "inventory": {AssetType.WOOD: 10, AssetType.FOOD: 500},
             "market_data": {"best_bid": 0, "best_ask": 0, "last_price": 0, "trend": "flat"},
             "memories": "",
+            "breaking_news": None,
             "thought_process": None,
             "chosen_action": None,
             "order_details": None
@@ -94,6 +99,7 @@ async def run_simulation():
             "inventory": {AssetType.WOOD: 500, AssetType.FOOD: 10},
             "market_data": {"best_bid": 0, "best_ask": 0, "last_price": 0, "trend": "flat"},
             "memories": "",
+            "breaking_news": None,
             "thought_process": None,
             "chosen_action": None,
             "order_details": None
