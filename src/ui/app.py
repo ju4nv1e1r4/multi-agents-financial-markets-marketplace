@@ -3,6 +3,7 @@ import redis
 import json
 import time
 import pandas as pd
+import random
 import os
 from datetime import datetime
 import uuid
@@ -63,9 +64,31 @@ with st.sidebar.form("order_form"):
 
 st.sidebar.markdown("---")
 if st.sidebar.button("🔥 INJETAR NOTÍCIA (CAOS)"):
+    chaos = [
+        "ALERTA: Praga de gafanhotos devasta 40% da safra no hemisfério sul; FOOD deve dobrar de preço.",
+        "BREAKING: Incêndios incontroláveis no Canadá reduzem oferta global de WOOD em 25%.",
+        "URGENTE: Embargo comercial repentino trava exportações de FOOD da maior potência agrícola.",
+        "MERCADO: Boom imobiliário na Ásia esgota estoques de WOOD; construtoras em pânico.",
+        "FLASH: Inundação recorde destrói armazéns principais; escassez imediata de FOOD.",
+        "URGENTE: Nova tecnologia de clonagem de árvores promete triplicar oferta de WOOD em 2 anos; futuros despencam.",
+        "CRISE: Greve geral de caminhoneiros paralisa distribuição de FOOD e WOOD no continente.",
+        "ALERTA: Fungo resistente ataca plantações de trigo; analistas preveem colapso na oferta de FOOD.",
+        "BULL MARKET: Incentivos fiscais para casas de madeira aquecem demanda por WOOD vertiginosamente.",
+        "BREAKING: Super safra inesperada inunda o mercado de FOOD; preços caem ao menor nível em uma década.",
+        "URGENTE: Regulamentação ambiental proíbe corte em florestas certificadas; choque de oferta em WOOD.",
+        "MERCADO: Seca severa esvazia hidrovias e impede transporte de FOOD para portos exportadores.",
+        "FLASH: Descoberta de cupim mutante em reservas estratégicas de WOOD; qualidade comprometida.",
+        "ALERTA: Gigante do agronegócio declara falência; incerteza domina mercado futuro de FOOD.",
+        "URGENTE: Tarifa de importação sobre WOOD é zerada; mercado local teme invasão de produto estrangeiro.",
+        "BREAKING: Onda de calor histórica queima lavouras antes da colheita; futuros de FOOD em limite de alta.",
+        "CRISE: Escândalo de contaminação em grandes lotes de FOOD gera recall massivo e desconfiança."
+    ]
+
+    randomized_chaos = random.SystemRandom(chaos)
+    chaos_message = randomized_chaos.sample(chaos, len(chaos))
     news = {
         "type": "NEWS",
-        "content": "URGENTE: Nova regulamentação proíbe corte de WOOD! Escassez iminente.",
+        "content": chaos_message[0],
         "timestamp": datetime.now().isoformat()
     }
     r.publish("market:news", json.dumps(news))
