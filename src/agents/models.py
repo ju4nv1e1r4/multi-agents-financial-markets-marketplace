@@ -17,6 +17,7 @@ class AgentBrainState(TypedDict):
     # financial state
     inventory: dict[AssetType, int]
     gold: float
+    dolar: float
     
     # perception
     market_data: MarketObservation

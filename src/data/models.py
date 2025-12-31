@@ -19,6 +19,7 @@ class AssetType(str, Enum):
     FOOD = "FOOD"
     IRON = "IRON"
     GOLD = "GOLD"
+    DOLAR = "DOLAR"
 
 class Order(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -48,4 +49,5 @@ class AgentState(BaseModel):
     role: str
     inventory: dict[AssetType, int]
     gold_balance: Decimal
+    dolar_balance: Decimal
     personality: str

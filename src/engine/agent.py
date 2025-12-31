@@ -2,13 +2,14 @@ from decimal import Decimal
 from src.data.models import AgentState, Order, OrderSide, AssetType, Trade, OrderType
 
 class Agent:
-    def __init__(self, agent_id: str, role: str, personality: str, initial_gold: float = 1000.0):
+    def __init__(self, agent_id: str, role: str, personality: str, initial_gold: float = 1000.0, initial_dolar: float = 500.00):
         self.state = AgentState(
             agent_id=agent_id,
             role=role,
             inventory={asset: 0 for asset in AssetType},
             gold_balance=Decimal(str(initial_gold)),
-            personality=personality
+            dolar_balance=Decimal(str(initial_dolar)),
+            personality=personality,
         )
 
     def create_order(self, asset: AssetType, side: OrderSide, price: float, quantity: int, order_type: OrderType = OrderType.LIMIT) -> Order:
@@ -33,10 +34,12 @@ class Agent:
 
         if trade.buyer_agent_id == self.state.agent_id:
             self.state.gold_balance -= total_value
+            self.state.dolar_balance += total_value
             self.state.inventory[trade.asset] += trade.quantity
         elif trade.seller_agent_id == self.state.agent_id:
             self.state.gold_balance += total_value
+            self.state.dolar_balance -= total_value
             self.state.inventory[trade.asset] -= trade.quantity
 
     def __repr__(self):
-        return f"<Agent {self.state.agent_id} | Gold: ${self.state.gold_balance:.2f} | Inv: {self.state.inventory}>"
+        return f"<Agent {self.state.agent_id} | Gold: ${self.state.gold_balance:.2f} | Dolar: ${self.state.dolar_balance:.2f} | Inv: {self.state.inventory}>"

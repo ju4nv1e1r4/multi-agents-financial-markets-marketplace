@@ -88,6 +88,7 @@ class AgentBrain:
             ("human", """
             STATUS ATUAL:
             - Ouro: {gold}
+            - Dolar: {dolar}
             - Inventário: {inventory}
             - Mercado: {market_data}
             ÚLTIMA NOTÍCIA: {breaking_news}

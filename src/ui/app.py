@@ -42,7 +42,7 @@ else:
 st.sidebar.markdown("---")
 st.sidebar.subheader("📝 Boleta Rápida")
 with st.sidebar.form("order_form"):
-    asset = st.selectbox("Ativo", ["WOOD", "FOOD", "GOLD"])
+    asset = st.selectbox("Ativo", ["WOOD", "FOOD", "GOLD", "DOLAR"])
     side = st.selectbox("Lado", ["BID", "ASK"])
     price = st.number_input("Preço", min_value=0.1, value=10.0, step=0.5)
     qty = st.number_input("Qtd", min_value=1, value=10, step=1)
@@ -106,10 +106,12 @@ while True:
         p_wood = float(r.get("market:price:WOOD") or 0)
         p_food = float(r.get("market:price:FOOD") or 0)
         p_gold = float(r.get("market:price:GOLD") or 0)
+        p_dolar = float(r.get("market:price:DOLAR") or 0)
 
         col1.metric("🌲 WOOD Price", f"${p_wood:.2f}", border=True)
         col2.metric("🍎 FOOD Price", f"${p_food:.2f}", border=True)
         col3.metric("💰 GOLD Price", f"${p_gold:.2f}", border=True)
+        col1.metric("💵 Dolar Price", f"${p_dolar:.2f}", border=True)
 
         st.subheader("📰 News Feed")
         latest_news = r.lrange("market:news_history", 0, 0)

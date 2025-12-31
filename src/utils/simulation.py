@@ -30,19 +30,23 @@ async def run_simulation():
 
     agents = []
     roles_config = [
-        ("Market Maker", "Conservador. Fornece liquidez.", 100000.0),
-        ("Speculator", "Agressivo (FOMO).", 5000.0),
-        ("Producer", "Pragmático. Vende para pagar contas.", 1000.0),
-        ("Value Investor", "Analítico. Compra na baixa.", 10000.0)
+        ("Market Maker Conversador", "Conservador. Fornece liquidez.", 100000.0, 50000.0),
+        ("Market Maker Speculator", "Agressivo. Fornece liquidez.", 100000.0, 50000.0),
+        ("Speculator", "Agressivo (FOMO).", 5000.0, 10000.0),
+        ("Speculator", "Agressivo (Arbitrário). Gosta de trades curtos. Spreads curtos e ativos baratos para ganhos rápidos.", 5000.0, 10000.0),
+        ("Producer", "Pragmático. Vende para pagar contas.", 1000.0, 60000.0),
+        ("Value Investor", "Analítico. Compra na baixa.", 10000.0, 500000.0),
+        ("Regular_Investor", "Conservador. Gosta de investimentos seguros.", 5000.0, 1000000.0),
     ]
 
     for i in range(1, 21):
-        role, persona, gold = roles_config[i % len(roles_config)]
+        role, persona, gold, dolar = roles_config[i % len(roles_config)]
         agents.append({
             "agent_id": f"agent_{i:02d}_{role.replace(' ', '_').lower()}",
             "role": role,
             "personality": persona,
             "gold": gold,
+            "dolar": dolar,
             "inventory": {AssetType.WOOD: 50, AssetType.FOOD: 50},
             "market_data": {"best_bid": 0, "best_ask": 0, "last_price": 0, "trend": "flat"},
             "memories": "",
